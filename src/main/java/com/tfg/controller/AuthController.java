@@ -1,5 +1,7 @@
 package com.tfg.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +29,7 @@ public class AuthController {
 	private final AuthenticationManager authenticationManager;
 	private final JwtService jwtService;
 	private final IUserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -42,6 +45,7 @@ public class AuthController {
 			UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNombre(), user.getTelefono(),
 					user.getRole(), user.getEspecialidad(), user.getActivo());
 			
+			logger.info("Login del usuario: {}", loginRequest.getEmail());
 			return ResponseEntity.ok(new LoginResponse(jwt, userDto));
 		} catch (BadCredentialsException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
@@ -53,6 +57,7 @@ public class AuthController {
 	@PostMapping("/register")
 	public ResponseEntity<?> register(@Valid @RequestBody User user) {
 		try {
+			logger.info("Registro del usuario: {}", user.getEmail());
 			return ResponseEntity.ok(userService.createUser(user));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
