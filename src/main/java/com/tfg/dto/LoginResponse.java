@@ -14,6 +14,8 @@ public class LoginResponse {
 	private String email;
 	private String nombre;
 	private User.UserRole role;
+	private String telefono;
+	private Boolean activo;
 
 	public LoginResponse(String token, User user) {
 		this.token = token;
@@ -21,6 +23,8 @@ public class LoginResponse {
 		this.email = user.getEmail();
 		this.nombre = user.getNombre();
 		this.role = user.getRole();
+		this.telefono = user.getTelefono();
+		this.activo = user.getActivo();
 	}
 	public LoginResponse(String token, UserDto user) {
 		this.token = token;
@@ -28,5 +32,7 @@ public class LoginResponse {
 		this.email = user.getEmail();
 		this.nombre = user.getNombre();
 		this.role = user.getRole();
+		this.telefono = user.getTelefono();
+		this.activo = user.getActivo();
 	}
 }

@@ -29,7 +29,7 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 		User user = userRepository.findByEmail(username)
 				.orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-		if (!user.getActivo()) {
+		if (!Boolean.TRUE.equals(user.getActivo())) {
 			throw new UsernameNotFoundException("Usuario inactivo: " + username);
 		}
 
@@ -78,6 +78,8 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 		if (userDto.getEspecialidad() != null) {
 			user.setEspecialidad(userDto.getEspecialidad());
 		}
+		user.setRole(userDto.getRole());
+		user.setActivo(userDto.getActivo());
 
 		User updatedUser = userRepository.save(user);
 		return convertToDto(updatedUser);

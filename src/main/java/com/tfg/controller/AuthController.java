@@ -1,5 +1,7 @@
 package com.tfg.controller;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,10 +11,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.tfg.dto.LoginRequest;
 import com.tfg.dto.LoginResponse;
+import com.tfg.dto.RegisterRequest;
 import com.tfg.dto.UserDto;
 import com.tfg.model.User;
 import com.tfg.service.IUserService;
@@ -29,7 +35,7 @@ public class AuthController {
 	private final AuthenticationManager authenticationManager;
 	private final JwtService jwtService;
 	private final IUserService userService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -41,10 +47,10 @@ public class AuthController {
 			String jwt = jwtService.generateToken(userDetails);
 
 			User user = userService.getUserEntityByEmail(loginRequest.getEmail());
-			
+
 			UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNombre(), user.getTelefono(),
 					user.getRole(), user.getEspecialidad(), user.getActivo());
-			
+
 			logger.info("Login del usuario: {}", loginRequest.getEmail());
 			return ResponseEntity.ok(new LoginResponse(jwt, userDto));
 		} catch (BadCredentialsException e) {
@@ -55,12 +61,27 @@ public class AuthController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@Valid @RequestBody User user) {
+	public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
 		try {
-			logger.info("Registro del usuario: {}", user.getEmail());
-			return ResponseEntity.ok(userService.createUser(user));
+			if (request.getRole() == User.UserRole.admin) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN)
+						.body(Map.of("error", "No está permitido registrarse como administrador"));
+			}
+
+			User user = new User();
+			user.setNombre(request.getNombre());
+			user.setEmail(request.getEmail());
+			user.setPassword(request.getPassword());
+			user.setTelefono(request.getTelefono());
+			user.setRole(request.getRole());
+
+			logger.info("Registro del usuario: {} con rol: {}", request.getEmail(), request.getRole());
+			return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			logger.error("Error en registro: {}", e.getMessage());
+			return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
 		}
 	}
 }
