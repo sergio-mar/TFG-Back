@@ -1,5 +1,7 @@
 package com.tfg;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -12,13 +14,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class ServiciosApplication {
 
+	private static final Logger logger = LoggerFactory.getLogger(ServiciosApplication.class);
+
 	public static void main(String[] args) {
 		SpringApplication.run(ServiciosApplication.class, args);
-		System.out.println("\n========================================");
-		System.out.println("🚀 Aplicación iniciada correctamente");
-		System.out.println("📍 API disponible en: http://localhost:8080");
-		System.out.println("📊 Base de datos: db_servicios");
-		System.out.println("========================================\n");
+		logger.info("\n========================================");
+		logger.info("🚀 Aplicación iniciada correctamente");
+		logger.info("📍 API disponible en: http://localhost:8080");
+		logger.info("📊 Base de datos: db_servicios");
+		logger.info("========================================\n");
 	}
 
 	/**
@@ -27,7 +31,7 @@ public class ServiciosApplication {
 	 */
 	public static void generatePassword(String rawPassword) {
 		PasswordEncoder encoder = new BCryptPasswordEncoder();
-		System.out.println("Contraseña original: " + rawPassword);
-		System.out.println("Contraseña hasheada: " + encoder.encode(rawPassword));
+		logger.info("Contraseña original: " + rawPassword);
+		logger.info("Contraseña hasheada: " + encoder.encode(rawPassword));
 	}
 }
